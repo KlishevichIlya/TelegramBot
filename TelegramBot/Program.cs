@@ -1,6 +1,8 @@
 ﻿using System;
+using ParserAutoRun.Controllers;
 using Telegram.Bot;
 using Telegram.Bot.Args;
+
 
 namespace TelegramBot
 {
@@ -8,34 +10,45 @@ namespace TelegramBot
     {
         private static string _token = "1973694233:AAHqgQSqs7lz-TE7n5HVCm5Z692ZRiivQcc";
         private static TelegramBotClient _client;
+        private static NovostiController _novostiController;
 
         
         static void Main(string[] args)
         {
             _client = new TelegramBotClient(_token);
+            _novostiController = new NovostiController();
             _client.StartReceiving();
             _client.OnMessage += OnMessageHandler;
             Console.ReadLine();
             _client.StopReceiving();
         }
 
-        private static void OnMessageHandler(object sender, MessageEventArgs e)
+        private static async void OnMessageHandler(object sender, MessageEventArgs e)
         {
-            if(e.Message != null && e.Message.Type == Telegram.Bot.Types.Enums.MessageType.Text && !string.IsNullOrEmpty(e.Message.Text))
+            if (e.Message == null || e.Message.Type != Telegram.Bot.Types.Enums.MessageType.Text ||
+                string.IsNullOrEmpty(e.Message.Text)) return;
+            try
             {
-                try
+                if (!e.Message.Text.ToLower().Contains("/work")) return;
+                
+                var countOfPage = await _novostiController.GetLastPage();
+                for (var currentPage = 1; currentPage <= countOfPage; currentPage++)
                 {
-                    if(e.Message.Text.ToLower().Contains("hi"))
+                    var articles = await _novostiController.GetHtmlRequest(currentPage);
+                    foreach (var article in articles)
                     {
-                        _client.SendTextMessageAsync(e.Message.Chat.Id, "Proverka");
+                        await _client.SendTextMessageAsync(e.Message.Chat.Id, article.Href +
+                                                                              "\n" + article.Title);
                     }
-                    
                 }
-                catch(Exception ex)
-                {
+                
 
-                }
-            }            
+
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
     }
 }
