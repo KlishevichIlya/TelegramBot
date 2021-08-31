@@ -18,13 +18,13 @@ namespace ParserAutoRun.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class NovostiController : ControllerBase
+    public class NewsController : ControllerBase
     {
         private readonly string _url;
         private readonly HttpClient _client;
         private readonly List<Article> _articles;
 
-        public NovostiController()
+        public NewsController()
         {
             _client = new HttpClient();
             _url = $"https://autorun.by/novosti/soligorsk/";
@@ -35,37 +35,39 @@ namespace ParserAutoRun.Controllers
         public async Task<List<Article>> GetHtmlRequest(int page)
         {
             _articles.Clear();
-            var response = await _client.GetAsync($"{_url}?page={page}");
-            if (!response.IsSuccessStatusCode)
-                return null;
-            var source = await response.Content.ReadAsStringAsync();
-            var parser = new HtmlParser();
-            var document = await parser.ParseDocumentAsync(source);
+            var document = await GetDocument();
 
-            foreach(var node in document.QuerySelectorAll("div.elem-66 div.news-item"))
-            {                
+            foreach (var node in document.QuerySelectorAll("div.elem-66 div.news-item"))
+            {
                 var item = new Article
                 {
                     Href = "https://autorun.by/" + node.QuerySelector("div.item a.thumb").GetAttribute("href"),
-                    Image = "11",
+                    Image = "https://autorun.by/" + node.QuerySelector("div.item a.thumb img").GetAttribute("src"),
                     Title = node.QuerySelector("div.item a.thumb img").GetAttribute("alt")
                 };
                 _articles.Add(item);
-            }           
+            }
             return _articles;
         }
 
+        [HttpGet("GetLastPage")]
         public async Task<int> GetLastPage()
         {
-            var response = await _client.GetAsync($"{_url}");
-            if (!response.IsSuccessStatusCode)
-                return -1;
-            var source = await response.Content.ReadAsStringAsync();
-            var parser = new HtmlParser();
-            var document = await parser.ParseDocumentAsync(source);
+            var document = await GetDocument();
             var linkToTheLastPage = document.QuerySelector("div.elem-66 div#pdopage ul.pagination")
                 .LastElementChild.InnerHtml;
             return Convert.ToInt32(Regex.Match(linkToTheLastPage, @"page=(\d+)").Groups[1].Value);
-        } 
+        }
+
+        private async Task<IHtmlDocument> GetDocument()
+        {
+            var response = await _client.GetAsync($"{_url}");
+            if (!response.IsSuccessStatusCode)           
+                return null;           
+            var source = await response.Content.ReadAsStringAsync();
+            var parser = new HtmlParser();
+            return await parser.ParseDocumentAsync(source);
+
+        }
     }
 }
