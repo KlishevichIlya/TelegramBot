@@ -33,33 +33,33 @@ namespace TelegramBot
         }
 
 
-        private static async void BotOnMessageRecieved(object sender, MessageEventArgs e)
-        {
-            var keyboard = new ReplyKeyboardMarkup();
-            keyboard.Keyboard =
-                        new KeyboardButton[][]
-            {
-                new KeyboardButton[]
-                {
-                    new KeyboardButton("История"),
-                    new KeyboardButton("Подписка")
-                },
+        //private static async void BotOnMessageRecieved(object sender, MessageEventArgs e)
+        //{
+        //    var keyboard = new ReplyKeyboardMarkup();
+        //    keyboard.Keyboard =
+        //                new KeyboardButton[][]
+        //    {
+        //        new KeyboardButton[]
+        //        {
+        //            new KeyboardButton("История"),
+        //            new KeyboardButton("Подписка")
+        //        },
 
-                new KeyboardButton[]
-                {
-                    new KeyboardButton("Перейти на сайт")
-                },
+        //        new KeyboardButton[]
+        //        {
+        //            new KeyboardButton("Перейти на сайт")
+        //        },
 
-                new KeyboardButton[]
-                {
-                    new KeyboardButton("3-1"),
-                    new KeyboardButton("3-2"),
-                    new KeyboardButton("3-3")
-                }
-            };
+        //        new KeyboardButton[]
+        //        {
+        //            new KeyboardButton("3-1"),
+        //            new KeyboardButton("3-2"),
+        //            new KeyboardButton("3-3")
+        //        }
+        //    };
                        
-            await _client.SendTextMessageAsync(e.Message.Chat.Id,"Выберите неогбходимую функцию", replyMarkup: keyboard);
-        }
+        //    await _client.SendTextMessageAsync(e.Message.Chat.Id,"Выберите неогбходимую функцию", replyMarkup: keyboard);
+        //}
 
         private static async Task OnLoadMoreNewsAsync(long chatId, int offset, int count)
         {
@@ -81,8 +81,8 @@ namespace TelegramBot
              if (ev.CallbackQuery.Data.StartsWith("load_"))
             {               
                 var (offset, count) = GetOffsetAndCountFromString(ev.CallbackQuery.Data);
-                await SentArticle(ev.CallbackQuery.Message.Chat.Id, offset, count);
-                await OnLoadMoreNewsAsync(ev.CallbackQuery.Message.Chat.Id, offset, count);
+                await _client.DeleteMessageAsync(ev.CallbackQuery.Message.Chat.Id, ev.CallbackQuery.Message.MessageId);
+                await SentArticle(ev.CallbackQuery.Message.Chat.Id, offset, count);                
             }            
         }
         private static (int, int) GetOffsetAndCountFromString(string str)
@@ -102,8 +102,9 @@ namespace TelegramBot
             {
                 var linkButton = KeyboardGoOver("Перейти", article.Href);
                 await _client.SendPhotoAsync(chatId: chatId, photo: article.Image,
-                        caption: $"*{article.Title}*", parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown, replyMarkup: linkButton);
+                        caption: $"*{article.Title}*", parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown, replyMarkup: linkButton);                
             }
+            await OnLoadMoreNewsAsync(chatId, offset + count, count);
         }
 
         public static InlineKeyboardMarkup KeyboardGoOver(string text, string url)
@@ -130,18 +131,17 @@ namespace TelegramBot
                 if (e.Message.Text.ToLower().Contains("/lastnews"))
                 {
                     await SentArticle(e.Message.Chat.Id, 0, 5);
-                    await OnLoadMoreNewsAsync(e.Message.Chat.Id, 0, 5);
-
+                    
                 }
                 #endregion
 
-                if (e.Message.Text.ToLower().Contains("/start") || e.Message.Text.Contains("/menu"))                                        
-                {
-                    BotOnMessageRecieved(sender, e);
-                }
+                //if (e.Message.Text.ToLower().Contains("/start") || e.Message.Text.Contains("/menu"))                                        
+                //{
+                //    BotOnMessageRecieved(sender, e);
+                //}
                 if (e.Message.Text.ToLower().Contains("/load"))
                 {
-                    OnLoadMoreNewsAsync(e.Message.Chat.Id,0, 5);
+                    await OnLoadMoreNewsAsync(e.Message.Chat.Id,0, 5);
                 }
                
 
