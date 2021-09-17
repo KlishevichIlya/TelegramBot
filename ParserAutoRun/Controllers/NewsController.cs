@@ -47,20 +47,11 @@ namespace ParserAutoRun.Controllers
             return articles.GetRange(offset % newsPerPage, count); 
         }
 
-        private int CalculatePage(int offset)
+        private static int CalculatePage(int offset)
         {
             return offset / newsPerPage + 1;
         }
-
-        //[HttpGet("GetLastPage")]
-        //public async Task<int> GetLastPage()
-        //{
-        //    var document = await GetDocument();
-        //    var linkToTheLastPage = document.QuerySelector("div.elem-66 div#pdopage ul.pagination")
-        //        .LastElementChild.InnerHtml;
-        //    return Convert.ToInt32(Regex.Match(linkToTheLastPage, @"page=(\d+)").Groups[1].Value);
-        //}
-
+         
         private async Task<IHtmlDocument> GetDocument(int page)
         {
             var response = await _client.GetAsync($"{_url}?page={page}");
