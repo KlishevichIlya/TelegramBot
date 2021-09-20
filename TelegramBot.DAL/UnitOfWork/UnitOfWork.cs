@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using TelegramBot.DAL.Data;
 using TelegramBot.DAL.NewsRepository;
 using TelegramBot.DAL.UserRepository;
@@ -21,6 +22,6 @@ namespace TelegramBot.DAL.UnitOfWork
 
         public int Complete() =>  _context.SaveChanges();
 
-        public void Dispose() => _context.Dispose();
+        //public void Dispose() => _context.Dispose();
     }
 }

@@ -11,7 +11,7 @@ namespace TelegramBot.DAL
         public static void Injection(IServiceCollection services)
         {
             services.AddTransient(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-            services.AddTransient<IUserRepository, UserRepository.UserRepository>();
+            services.AddScoped<IUserRepository, UserRepository.UserRepository>();
             services.AddTransient<INewsRepository, NewsRepository.NewsRepository>();
             services.AddTransient<IUnitOfWork, UnitOfWork.UnitOfWork>();
         }

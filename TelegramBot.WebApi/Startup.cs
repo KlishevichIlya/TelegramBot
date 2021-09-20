@@ -35,12 +35,7 @@ namespace TelegramBot.WebApi
                     Configuration.GetConnectionString("DefaultConnection"),
                     b => b.MigrationsAssembly(typeof(ApplicationContext).Assembly.FullName)));
             BLLInjection.Injection(services);
-           // services.AddTransient(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-            //services.AddTransient<IUserRepository, UserRepository>();
-            //services.AddTransient<INewsRepository, NewsRepository>();
-            //services.AddTransient<IUnitOfWork, UnitOfWork>();
-          //  services.AddSingleton<ITelegramBotClient, TelegramBotClient>();
-           // services.AddTransient<IParser, ParserService>();
+           
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "TelegramBot.WebApi", Version = "v1" });
@@ -69,3 +64,11 @@ namespace TelegramBot.WebApi
         }
     }
 }
+
+
+// services.AddTransient(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+//services.AddTransient<IUserRepository, UserRepository>();
+//services.AddTransient<INewsRepository, NewsRepository>();
+//services.AddTransient<IUnitOfWork, UnitOfWork>();
+//  services.AddSingleton<ITelegramBotClient, TelegramBotClient>();
+// services.AddTransient<IParser, ParserService>();

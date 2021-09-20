@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 using TelegramBot.DAL.Data;
 
 namespace TelegramBot.DAL.GenericRepository
@@ -12,7 +13,7 @@ namespace TelegramBot.DAL.GenericRepository
 
         public GenericRepository(ApplicationContext context) => _context = context;
 
-        void IGenericRepository<T>.Add(T entity) => _context.Set<T>().Add(entity);
+        async Task IGenericRepository<T>.AddAsync(T entity) => await _context.Set<T>().AddAsync(entity);
 
         void IGenericRepository<T>.AddRange(IEnumerable<T> entities) => _context.Set<T>().AddRange(entities);
 
