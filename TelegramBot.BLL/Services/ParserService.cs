@@ -45,15 +45,15 @@ namespace TelegramBot.BLL.Services
                 listOfArticles.Add(item);
             }
             await SaveArticles(listOfArticles);
-            
+
             return listOfArticles.GetRange(offset % newsPerPage, count);
         }
 
         private async Task SaveArticles(IEnumerable<NewsDTO> articlesDTO)
-        {            
+        {
             var articles = _mapper.Map<IEnumerable<NewsDTO>, IEnumerable<News>>(articlesDTO);
-            await _unitOfWork.News.AddAsync(articles.First());
-            _unitOfWork.Complete();
+            await _unitOfWork.News.AddRangeAsync(articles);
+            await _unitOfWork.CompleteAsync();
         }
 
 

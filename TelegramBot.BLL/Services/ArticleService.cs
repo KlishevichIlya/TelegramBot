@@ -9,7 +9,7 @@ namespace TelegramBot.BLL.Services
 {
     public class ArticleService : IArticleService
     {
-        private IUnitOfWork _db;
+        private readonly IUnitOfWork _db;
         public ArticleService(IUnitOfWork db)
         {
             _db = db;

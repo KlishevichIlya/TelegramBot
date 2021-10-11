@@ -1,11 +1,11 @@
-﻿using System;
-using ParserAutoRun.Controllers;
+﻿using ParserAutoRun.Controllers;
+using System;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Args;
 using Telegram.Bot.Types.ReplyMarkups;
-using System.Threading.Tasks;
-using System.Text.RegularExpressions;
-using System.Linq;
 
 
 namespace TelegramBot
@@ -15,19 +15,19 @@ namespace TelegramBot
         private static string _token = "1973694233:AAHqgQSqs7lz-TE7n5HVCm5Z692ZRiivQcc";
         private static TelegramBotClient _client;
         private static NewsController _novostiController;
-               
+
         static void Main(string[] args)
         {
             _client = new TelegramBotClient(_token);
-            _novostiController = new NewsController();            
-            _client.StartReceiving();               
+            _novostiController = new NewsController();
+            _client.StartReceiving();
             _client.OnMessage += OnMessageHandler;
             _client.OnCallbackQuery += OnLoadCallBackAsync;
 
             Console.ReadLine();
             _client.StopReceiving();
         }
-        
+
         private static async Task OnLoadMoreNewsAsync(long chatId, int offset, int count)
         {
             var keyboard = new InlineKeyboardMarkup(new[]
@@ -37,20 +37,20 @@ namespace TelegramBot
                         InlineKeyboardButton.WithCallbackData("Загрузить", $"load_{offset}_{count}")
                     },
 
-                });           
-           
+                });
+
             await _client.SendTextMessageAsync(chatId, "Хотите ли загрузить еще 5 новостей?", replyMarkup: keyboard);
         }
 
         private static async void OnLoadCallBackAsync(object src, CallbackQueryEventArgs ev)
-        {            
-            
-             if (ev.CallbackQuery.Data.StartsWith("load_"))
-            {               
+        {
+
+            if (ev.CallbackQuery.Data.StartsWith("load_"))
+            {
                 var (offset, count) = GetOffsetAndCountFromString(ev.CallbackQuery.Data);
                 await _client.DeleteMessageAsync(ev.CallbackQuery.Message.Chat.Id, ev.CallbackQuery.Message.MessageId);
-                await SendArticleAsync(ev.CallbackQuery.Message.Chat.Id, offset, count);                
-            }            
+                await SendArticleAsync(ev.CallbackQuery.Message.Chat.Id, offset, count);
+            }
         }
         private static (int, int) GetOffsetAndCountFromString(string str)
         {
@@ -59,7 +59,7 @@ namespace TelegramBot
                          .Select(m => Convert.ToInt32(m.Value))
                          .ToList();
             return (numbers[0], numbers[1]);
-        
+
         }
 
         private static async Task SendArticleAsync(long chatId, int offset, int count)
@@ -70,7 +70,7 @@ namespace TelegramBot
                 var linkButton = KeyboardGoOver("Перейти", article.Href);
                 await _client.SendPhotoAsync(chatId: chatId, photo: article.Image,
                         caption: $"*{article.Title}*", parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown, replyMarkup: linkButton);
-                
+
             }
             await OnLoadMoreNewsAsync(chatId, offset + count, count);
         }
@@ -92,20 +92,20 @@ namespace TelegramBot
                 string.IsNullOrEmpty(e.Message.Text)) return;
 
             try
-            {                
+            {
                 if (e.Message.Text.ToLower().Contains("/lastnews"))
                 {
                     await SendArticleAsync(e.Message.Chat.Id, 0, 5);
-                    
-                }               
-                              
+
+                }
+
                 if (e.Message.Text.ToLower().Contains("/load"))
                 {
-                    await OnLoadMoreNewsAsync(e.Message.Chat.Id,0, 5);
+                    await OnLoadMoreNewsAsync(e.Message.Chat.Id, 0, 5);
                 }
-               
+
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }

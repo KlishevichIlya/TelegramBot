@@ -6,9 +6,9 @@ namespace TelegramBot.Entities
     {
         public DbSet<TelegramNews> TelegramNews { get; set; }
 
-        public ApplicationContext()            
+        public ApplicationContext()
         {
-            Database.EnsureCreated();   
+            Database.EnsureCreated();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

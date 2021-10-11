@@ -11,7 +11,7 @@ namespace TelegramBot.BLL
         public static void Injection(IServiceCollection services)
         {
             DALInjection.Injection(services);
-            services.AddTransient<IParser, ParserService>();
+            services.AddScoped<IParser, ParserService>();
             services.AddTransient<IArticleService, ArticleService>();
             services.AddAutoMapper(typeof(CommonMappingProfile));
         }

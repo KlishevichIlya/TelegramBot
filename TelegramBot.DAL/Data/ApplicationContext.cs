@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
 using TelegramBot.DAL.Entities;
 
 namespace TelegramBot.DAL.Data
@@ -10,9 +9,10 @@ namespace TelegramBot.DAL.Data
         public DbSet<User> Users { get; set; }
 
         public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options)
-        {           
+        {
+            Database.EnsureCreated();
         }
-               
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<News>().Property(tn => tn.Id).ValueGeneratedOnAdd();

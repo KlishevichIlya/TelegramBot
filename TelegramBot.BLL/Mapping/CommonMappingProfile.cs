@@ -12,7 +12,7 @@ namespace TelegramBot.BLL.Mapping
                 .ForMember(x => x.Id, f => f.MapFrom(f => f.Id))
                 .ForMember(x => x.Image, f => f.MapFrom(f => f.Image))
                 .ForMember(x => x.Title, f => f.MapFrom(f => f.Title));
-                
+
         }
     }
 }

@@ -4,7 +4,7 @@ using TelegramBot.DAL.GenericRepository;
 
 namespace TelegramBot.DAL.NewsRepository
 {
-    public interface INewsRepository: IGenericRepository<News>
+    public interface INewsRepository : IGenericRepository<News>
     {
         IEnumerable<News> GetLastFiveNews();
     }

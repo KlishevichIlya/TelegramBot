@@ -5,15 +5,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using Telegram.Bot;
 using TelegramBot.BLL;
-using TelegramBot.BLL.Interfaces;
-using TelegramBot.BLL.Services;
 using TelegramBot.DAL.Data;
-using TelegramBot.DAL.GenericRepository;
-using TelegramBot.DAL.NewsRepository;
-using TelegramBot.DAL.UnitOfWork;
-using TelegramBot.DAL.UserRepository;
+using TelegramBot.WebApi.Entities;
+using TelegramBot.WebApi.Handlers;
 
 namespace TelegramBot.WebApi
 {
@@ -25,23 +20,23 @@ namespace TelegramBot.WebApi
         }
 
         public IConfiguration Configuration { get; }
-               
+
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-           
+
             services.AddDbContext<ApplicationContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection"),
-                    b => b.MigrationsAssembly(typeof(ApplicationContext).Assembly.FullName)));
+                    o => { o.CommandTimeout(100); }));
             BLLInjection.Injection(services);
-           
+            services.AddScoped<MessageHandler>();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "TelegramBot.WebApi", Version = "v1" });
             });
         }
-        
+
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -66,9 +61,12 @@ namespace TelegramBot.WebApi
 }
 
 
-// services.AddTransient(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+//services.AddTransient(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 //services.AddTransient<IUserRepository, UserRepository>();
 //services.AddTransient<INewsRepository, NewsRepository>();
-//services.AddTransient<IUnitOfWork, UnitOfWork>();
-//  services.AddSingleton<ITelegramBotClient, TelegramBotClient>();
-// services.AddTransient<IParser, ParserService>();
+//services.AddScoped<IUnitOfWork, UnitOfWork>();
+//services.AddSingleton<ITelegramBotClient, TelegramBotClient>();
+//services.AddTransient<IParser, ParserService>();
+
+//services.AddTransient<IArticleService, ArticleService>();
+//services.AddAutoMapper(typeof(CommonMappingProfile));
