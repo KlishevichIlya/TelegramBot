@@ -52,7 +52,11 @@ namespace TelegramBot.BLL.Services
         private async Task SaveArticles(IEnumerable<NewsDTO> articlesDTO)
         {
             var articles = _mapper.Map<IEnumerable<NewsDTO>, IEnumerable<News>>(articlesDTO);
-            await _unitOfWork.News.AddRangeAsync(articles);
+            var articlesFromDb = await _unitOfWork.News.GetAllAsync();
+            var articlesFiltered = articlesFromDb.Distinct().Where(x => articles.All(e => e.Title != x.Title));
+            if (articlesFiltered.Count() is 0)
+                await Task.CompletedTask;
+            await _unitOfWork.News.AddRangeAsync(articlesFiltered);
             await _unitOfWork.CompleteAsync();
         }
 

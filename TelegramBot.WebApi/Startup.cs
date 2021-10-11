@@ -4,13 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi.Models;
 using TelegramBot.BLL;
 using TelegramBot.DAL.Data;
-using TelegramBot.WebApi.Entities;
-using TelegramBot.WebApi.Handlers;
+using TelegramBot.Service.Handlers;
 
-namespace TelegramBot.WebApi
+namespace TelegramBot.Service
 {
     public class Startup
     {
@@ -31,10 +29,10 @@ namespace TelegramBot.WebApi
                     o => { o.CommandTimeout(100); }));
             BLLInjection.Injection(services);
             services.AddScoped<MessageHandler>();
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "TelegramBot.WebApi", Version = "v1" });
-            });
+            //services.AddSwaggerGen(c =>
+            //{
+            //    c.SwaggerDoc("v1", new OpenApiInfo { Title = "TelegramBot.WebApi", Version = "v1" });
+            //});
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -42,8 +40,8 @@ namespace TelegramBot.WebApi
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TelegramBot.WebApi v1"));
+                //app.UseSwagger();
+                //app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TelegramBot.WebApi v1"));
             }
 
             app.UseHttpsRedirection();
@@ -59,14 +57,3 @@ namespace TelegramBot.WebApi
         }
     }
 }
-
-
-//services.AddTransient(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-//services.AddTransient<IUserRepository, UserRepository>();
-//services.AddTransient<INewsRepository, NewsRepository>();
-//services.AddScoped<IUnitOfWork, UnitOfWork>();
-//services.AddSingleton<ITelegramBotClient, TelegramBotClient>();
-//services.AddTransient<IParser, ParserService>();
-
-//services.AddTransient<IArticleService, ArticleService>();
-//services.AddAutoMapper(typeof(CommonMappingProfile));

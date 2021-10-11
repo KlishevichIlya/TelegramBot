@@ -1,21 +1,29 @@
 ﻿using System;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Args;
 using Telegram.Bot.Types.ReplyMarkups;
 using TelegramBot.BLL.Interfaces;
-using TelegramBot.BLL.Services;
 
-namespace TelegramBot.WebApi.Handlers
+namespace TelegramBot.Service.Handlers
 {
     public class MessageHandler
     {
-        
         private readonly IParser _parser;
         public MessageHandler(IParser parser)
         {
             _parser = parser;
         }
+
+        /// <summary>
+        /// Handler of each event 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        /// <param name="_client"></param>
+        /// <returns></returns>
         public async Task Handle(object sender, MessageEventArgs e, ITelegramBotClient _client)
         {
             if (e.Message is not { Type: Telegram.Bot.Types.Enums.MessageType.Text } || string.IsNullOrEmpty(e.Message.Text)) return;
@@ -44,6 +52,14 @@ namespace TelegramBot.WebApi.Handlers
             }
         }
 
+        /// <summary>
+        /// Send articles to Telegram and show message for load more articles
+        /// </summary>
+        /// <param name="chatId"></param>
+        /// <param name="offset"></param>
+        /// <param name="count"></param>
+        /// <param name="_client"></param>
+        /// <returns></returns>
         private async Task SendArticleAsync(long chatId, int offset, int count, ITelegramBotClient _client)
         {
             var articles = await _parser.MakeHtmlRequest(offset, count);
@@ -57,6 +73,14 @@ namespace TelegramBot.WebApi.Handlers
             await OnLoadMoreNewsAsync(chatId, offset + count, count, _client);
         }
 
+        /// <summary>
+        /// Inline keyboard for loading new articles
+        /// </summary>
+        /// <param name="chatId"></param>
+        /// <param name="offset"></param>
+        /// <param name="count"></param>
+        /// <param name="_client"></param>
+        /// <returns></returns>
         private static async Task OnLoadMoreNewsAsync(long chatId, int offset, int count, ITelegramBotClient _client)
         {
             var keyboard = new InlineKeyboardMarkup(new[]
@@ -76,6 +100,12 @@ namespace TelegramBot.WebApi.Handlers
 
         }
 
+        /// <summary>
+        /// Inline keyboard for show link behind each article
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="url"></param>
+        /// <returns></returns>
         private static InlineKeyboardMarkup KeyboardGoOver(string text, string url)
         {
             return new InlineKeyboardMarkup(new[]
@@ -85,6 +115,33 @@ namespace TelegramBot.WebApi.Handlers
                     InlineKeyboardButton.WithUrl(text, url)
                 },
             });
+        }
+
+        /// <summary>
+        /// Handler for callback. Load a new five articles.
+        /// </summary>
+        /// <param name="ev"></param>
+        /// <param name="_client"></param>
+        /// <returns></returns>
+        public async Task CallBack(CallbackQueryEventArgs ev, ITelegramBotClient _client)
+        {
+            var (offset, count) = GetOffsetAndCountFromString(ev.CallbackQuery.Data);
+            await _client.DeleteMessageAsync(ev.CallbackQuery.Message.Chat.Id, ev.CallbackQuery.Message.MessageId);
+            await SendArticleAsync(ev.CallbackQuery.Message.Chat.Id, offset, count, _client);
+        }
+
+        /// <summary>
+        /// Get offset to 5 from string 
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        private static (int, int) GetOffsetAndCountFromString(string str)
+        {
+            var numbers = Regex.Matches(str, @"\d+")
+                .Cast<Match>()
+                .Select(m => Convert.ToInt32(m.Value))
+                .ToList();
+            return (numbers[0], numbers[1]);
         }
     }
 }

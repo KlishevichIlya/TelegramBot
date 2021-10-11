@@ -4,9 +4,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Args;
-using TelegramBot.WebApi.Handlers;
+using TelegramBot.Service.Handlers;
 
-namespace TelegramBot.WebApi.Entities
+namespace TelegramBot.Service.Entities
 {
     public class TelegramHostedService : IHostedService
     {
@@ -17,17 +17,41 @@ namespace TelegramBot.WebApi.Entities
         {
             _scopeFactory = scopeFactory;
         }
-
-
+        
+        /// <summary>
+        /// Starting Hosted Service
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         public Task StartAsync(CancellationToken cancellationToken)
         {
             _client = new TelegramBotClient(_token);
             _client.StartReceiving();
             _client.OnMessage += OnMessageHandlerAsync;
-
+            _client.OnCallbackQuery += OnLoadCallBackAsync;
             return Task.CompletedTask;
         }
 
+        /// <summary>
+        /// Handler for button "Load more news"
+        /// </summary>
+        /// <param name="src"></param>
+        /// <param name="ev"></param>
+        private async void OnLoadCallBackAsync(object src, CallbackQueryEventArgs ev)
+        {
+            if (ev.CallbackQuery.Data.StartsWith("load_"))
+            {
+                using var scope = _scopeFactory.CreateScope();
+                var handler = scope.ServiceProvider.GetRequiredService<MessageHandler>();
+                await handler.CallBack(ev, _client);
+            }
+        }
+
+        /// <summary>
+        /// Handle action from Telegram
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private async void OnMessageHandlerAsync(object sender, MessageEventArgs e)
         {
             using var scope = _scopeFactory.CreateScope();
@@ -35,9 +59,15 @@ namespace TelegramBot.WebApi.Entities
             await handler.Handle(sender, e, _client);
         }
 
+        /// <summary>
+        /// Stop Hosted service and stop receiving message from Telegram
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            _client.StopReceiving();
+            return Task.CompletedTask;
         }
     }
 }

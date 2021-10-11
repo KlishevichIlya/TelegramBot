@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using TelegramBot.WebApi.Entities;
+using TelegramBot.Service.Entities;
 
-namespace TelegramBot.WebApi
+
+namespace TelegramBot.Service
 {
     public class Program
     {
