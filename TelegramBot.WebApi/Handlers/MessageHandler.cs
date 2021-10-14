@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Linq;
+using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Args;
 using Telegram.Bot.Types.ReplyMarkups;
+using TelegramBot.BLL.DTO;
 using TelegramBot.BLL.Interfaces;
 
 namespace TelegramBot.Service.Handlers
@@ -12,9 +14,11 @@ namespace TelegramBot.Service.Handlers
     public class MessageHandler
     {
         private readonly IParser _parser;
-        public MessageHandler(IParser parser)
+        private readonly IUserService _userService;
+        public MessageHandler(IParser parser, IUserService userService)
         {
             _parser = parser;
+            _userService = userService;
         }
 
         /// <summary>
@@ -27,7 +31,7 @@ namespace TelegramBot.Service.Handlers
         public async Task Handle(object sender, MessageEventArgs e, ITelegramBotClient _client)
         {
             if (e.Message is not { Type: Telegram.Bot.Types.Enums.MessageType.Text } || string.IsNullOrEmpty(e.Message.Text)) return;
-
+            
             try
             {
                 if (e.Message.Text.ToLower().Contains("/lastnews"))
@@ -42,7 +46,12 @@ namespace TelegramBot.Service.Handlers
 
                 if (e.Message.Text.ToLower().Contains("/subscribe"))
                 {
-                    await OnStartSubscibeAsync(e.Message.From.Username, e.Message.From.Id);
+                    await OnStartSubscribeAsync(e.Message.From.Username, e.Message.From.Id);
+                }
+
+                if (e.Message.Text.ToLower().Contains("/unsubscribe"))
+                {
+                    await OnStopSubscibeAsync(e.Message.From.Username, e.Message.From.Id);
                 }
 
             }
@@ -65,12 +74,25 @@ namespace TelegramBot.Service.Handlers
             var articles = await _parser.MakeHtmlRequest(offset, count);
             foreach (var article in articles)
             {
-                var linkButton = KeyboardGoOver("Перейти", article.Href);
+                var linkButton = KeyboardGoOver("Перейти", (EncodeUrl(article.Href)));
                 await _client.SendPhotoAsync(chatId: chatId, photo: article.Image,
                     caption: $"*{article.Title}*", parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown, replyMarkup: linkButton);
 
             }
             await OnLoadMoreNewsAsync(chatId, offset + count, count, _client);
+        }
+
+        /// <summary>
+        /// Encode url without domain 
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        private string EncodeUrl(string uri)
+        {
+            var objectUri = new Uri(uri);
+            var staticPartOfUri = objectUri.Scheme + "://" + objectUri.Host + objectUri.Segments[0] + objectUri.Segments[1] + objectUri.Segments[2];
+            var encodePartOfQuery = WebUtility.UrlEncode(objectUri.Segments[3]);
+            return staticPartOfUri + encodePartOfQuery;
         }
 
         /// <summary>
@@ -95,7 +117,29 @@ namespace TelegramBot.Service.Handlers
             await _client.SendTextMessageAsync(chatId, "Хотите ли загрузить еще 5 новостей?", replyMarkup: keyboard);
         }
 
-        private static async Task OnStartSubscibeAsync(string userName, long userId)
+        /// <summary>
+        /// Subscribe user to automatically update news
+        /// </summary>
+        /// <param name="userName"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        private async Task OnStartSubscribeAsync(string userName, long userId)
+        {
+            var user = new UserDTO
+            {
+                UserId = userId.ToString(),
+                UserName = userName
+            };
+            await _userService.StartSubscribeAsync(user);
+        }
+
+        /// <summary>
+        /// Unsubscribe user from automatically update news
+        /// </summary>
+        /// <param name="userName"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        private async Task OnStopSubscibeAsync(string userName, long userId)
         {
 
         }

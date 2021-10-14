@@ -2,6 +2,8 @@
 using Microsoft.Extensions.Hosting;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Protocols;
 using Telegram.Bot;
 using Telegram.Bot.Args;
 using TelegramBot.Service.Handlers;
@@ -12,10 +14,11 @@ namespace TelegramBot.Service.Entities
     {
         private IServiceScopeFactory _scopeFactory;
         private TelegramBotClient _client;
-        private readonly string _token = "1973694233:AAHqgQSqs7lz-TE7n5HVCm5Z692ZRiivQcc";
-        public TelegramHostedService(IServiceScopeFactory scopeFactory)
+        private readonly IConfiguration _config;
+        public TelegramHostedService(IServiceScopeFactory scopeFactory, IConfiguration config)
         {
             _scopeFactory = scopeFactory;
+            _config = config;
         }
         
         /// <summary>
@@ -25,7 +28,7 @@ namespace TelegramBot.Service.Entities
         /// <returns></returns>
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            _client = new TelegramBotClient(_token);
+            _client = new TelegramBotClient(_config.GetValue<string>("Token"));
             _client.StartReceiving();
             _client.OnMessage += OnMessageHandlerAsync;
             _client.OnCallbackQuery += OnLoadCallBackAsync;

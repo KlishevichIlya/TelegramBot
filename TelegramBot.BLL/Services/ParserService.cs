@@ -53,14 +53,20 @@ namespace TelegramBot.BLL.Services
         {
             var articles = _mapper.Map<IEnumerable<NewsDTO>, IEnumerable<News>>(articlesDTO);
             var articlesFromDb = await _unitOfWork.News.GetAllAsync();
-            var articlesFiltered = articlesFromDb.Distinct().Where(x => articles.All(e => e.Title != x.Title));
-            if (articlesFiltered.Count() is 0)
-                await Task.CompletedTask;
-            await _unitOfWork.News.AddRangeAsync(articlesFiltered);
-            await _unitOfWork.CompleteAsync();
+
+            if (!articlesFromDb.Any())
+            {
+                await _unitOfWork.News.AddRangeAsync(articles);
+                await _unitOfWork.CompleteAsync();
+            }
+            else
+            {
+                var filteredArticles = articles.Where(a => !articlesFromDb.Any(db => a.Title == db.Title)).ToList();
+                await _unitOfWork.News.AddRangeAsync(filteredArticles);
+                await _unitOfWork.CompleteAsync();
+            }
         }
-
-
+        
         private static int CalculatePage(int offset)
         {
             return offset / newsPerPage + 1;
