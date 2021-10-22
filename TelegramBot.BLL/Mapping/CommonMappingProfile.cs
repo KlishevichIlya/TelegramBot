@@ -14,7 +14,7 @@ namespace TelegramBot.BLL.Mapping
                 .ForMember(x => x.Title, f => f.MapFrom(u => u.Title));
 
             CreateMap<UserDTO, User>()
-                .ForMember(x => x.Id, f => f.MapFrom(u => u.Id))
+                //.ForMember(x => x.Id, f => f.MapFrom(u => u.Id))
                 .ForMember(x => x.UserId, f => f.MapFrom(u => u.UserId))
                 .ForMember(x => x.UserName, f => f.MapFrom(u => u.UserName));
         }

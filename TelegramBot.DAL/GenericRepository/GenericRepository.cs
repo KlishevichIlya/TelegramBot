@@ -25,7 +25,7 @@ namespace TelegramBot.DAL.GenericRepository
 
         async Task<IEnumerable<T>> IGenericRepository<T>.GetAllAsync() => await _context.Set<T>().ToListAsync();
 
-        async Task<T> IGenericRepository<T>.GetByIdAsync(int id) => await _context.Set<T>().FindAsync(id);
+        async Task<T> IGenericRepository<T>.GetByIdAsync(string id) => await _context.Set<T>().FindAsync(id);
 
         void IGenericRepository<T>.Remove(T entity) => _context.Set<T>().Remove(entity);
 

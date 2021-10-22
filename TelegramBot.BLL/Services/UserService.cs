@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using AutoMapper;
 using TelegramBot.BLL.DTO;
@@ -24,16 +23,28 @@ namespace TelegramBot.BLL.Services
             var mapper = new Mapper(config);
             var user = mapper.Map<UserDTO, User>(userDTO);
             user.DateOfStartSubscription = DateTime.Now;
-            await _db.Users.AddAsync(user);
+            var checkUserInDb = await _db.Users.GetByIdAsync(userDTO.UserId);
+            if (checkUserInDb is not null)
+            {
+                checkUserInDb.isUnsubscribe = false;
+            }
+            else
+            {
+                user.isUnsubscribe = false;
+                await _db.Users.AddAsync(user);
+            }
+
             await _db.CompleteAsync();
+            await Task.CompletedTask;
         }
 
         public async Task StopSubscribeAsync(UserDTO userDTO)
         {
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<UserDTO, User>());
-            var mapper = new Mapper(config);
-            var user = mapper.Map<UserDTO, User>(userDTO);
-            _db.Users.Remove(user);
+            var userFromDb = await _db.Users.GetByIdAsync(userDTO.UserId);
+            if (userFromDb is not null)
+            {
+                userFromDb.isUnsubscribe = true;
+            }
             await _db.CompleteAsync();
         }
     }

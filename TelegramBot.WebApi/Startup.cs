@@ -29,10 +29,6 @@ namespace TelegramBot.Service
                     o => { o.CommandTimeout(100); }));
             BLLInjection.Injection(services);
             services.AddScoped<MessageHandler>();
-            //services.AddSwaggerGen(c =>
-            //{
-            //    c.SwaggerDoc("v1", new OpenApiInfo { Title = "TelegramBot.WebApi", Version = "v1" });
-            //});
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -40,8 +36,6 @@ namespace TelegramBot.Service
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                //app.UseSwagger();
-                //app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TelegramBot.WebApi v1"));
             }
 
             app.UseHttpsRedirection();

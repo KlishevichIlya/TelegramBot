@@ -46,7 +46,7 @@ namespace TelegramBot.Service.Handlers
 
                 if (e.Message.Text.ToLower().Contains("/subscribe"))
                 {
-                    await OnStartSubscribeAsync(e.Message.From.Username, e.Message.From.Id);
+                    await OnStartSubscribeAsync(e.Message.From.Username, e.Message.From.Id, _client, e.Message.Chat.Id);
                 }
 
                 if (e.Message.Text.ToLower().Contains("/unsubscribe"))
@@ -123,14 +123,18 @@ namespace TelegramBot.Service.Handlers
         /// <param name="userName"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        private async Task OnStartSubscribeAsync(string userName, long userId)
+        private async Task OnStartSubscribeAsync(string userName, long userId, ITelegramBotClient _client, long chatId)
         {
             var user = new UserDTO
             {
                 UserId = userId.ToString(),
                 UserName = userName
             };
-            await _userService.StartSubscribeAsync(user);
+
+            var temp = Task.Run(() =>
+            {
+                 _userService.StartSubscribeAsync(user);
+            }).ContinueWith(x => _client.SendTextMessageAsync(chatId, "Вы успешно подписались на рассылку!"));
         }
 
         /// <summary>
@@ -141,7 +145,12 @@ namespace TelegramBot.Service.Handlers
         /// <returns></returns>
         private async Task OnStopSubscibeAsync(string userName, long userId)
         {
-
+            var user = new UserDTO()
+            {
+                UserId = userId.ToString(),
+                UserName = userName
+            };
+            await _userService.StopSubscribeAsync(user);
         }
 
         /// <summary>
