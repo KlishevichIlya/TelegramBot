@@ -1,6 +1,6 @@
-﻿using System;
+﻿using AutoMapper;
+using System;
 using System.Threading.Tasks;
-using AutoMapper;
 using TelegramBot.BLL.DTO;
 using TelegramBot.BLL.Interfaces;
 using TelegramBot.DAL.Entities;

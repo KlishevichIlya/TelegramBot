@@ -49,6 +49,25 @@ namespace TelegramBot.BLL.Services
             return listOfArticles.GetRange(offset % newsPerPage, count);
         }
 
+        public async Task<IEnumerable<NewsDTO>> MakeRequestWithoutSaving()
+        {
+            var page = CalculatePage(0);
+            var document = await GetDocument(page);
+            var listOfArticles = new List<NewsDTO>();
+
+            foreach (var node in document.QuerySelectorAll("div.elem-66 div.news-item"))
+            {
+                var item = new NewsDTO
+                {
+                    Href = "https://autorun.by/" + node.QuerySelector("div.item a.thumb").GetAttribute("href"),
+                    Image = "https://autorun.by/" + node.QuerySelector("div.item a.thumb img").GetAttribute("src"),
+                    Title = node.QuerySelector("div.item a.thumb img").GetAttribute("alt")
+                };
+                listOfArticles.Add(item);
+            }
+            return listOfArticles.GetRange(0, 5);
+        }
+
         private async Task SaveArticles(IEnumerable<NewsDTO> articlesDTO)
         {
             var articles = _mapper.Map<IEnumerable<NewsDTO>, IEnumerable<News>>(articlesDTO);
@@ -56,17 +75,21 @@ namespace TelegramBot.BLL.Services
 
             if (!articlesFromDb.Any())
             {
+                foreach (var item in articles)
+                    item.Date = System.DateTime.Now;
                 await _unitOfWork.News.AddRangeAsync(articles);
                 await _unitOfWork.CompleteAsync();
             }
             else
             {
                 var filteredArticles = articles.Where(a => !articlesFromDb.Any(db => a.Title == db.Title)).ToList();
+                foreach (var item in filteredArticles)
+                    item.Date = System.DateTime.Now;
                 await _unitOfWork.News.AddRangeAsync(filteredArticles);
                 await _unitOfWork.CompleteAsync();
             }
         }
-        
+
         private static int CalculatePage(int offset)
         {
             return offset / newsPerPage + 1;

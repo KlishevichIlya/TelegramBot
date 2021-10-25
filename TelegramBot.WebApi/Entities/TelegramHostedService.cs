@@ -1,9 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Protocols;
 using Telegram.Bot;
 using Telegram.Bot.Args;
 using TelegramBot.Service.Handlers;
@@ -20,7 +19,7 @@ namespace TelegramBot.Service.Entities
             _scopeFactory = scopeFactory;
             _config = config;
         }
-        
+
         /// <summary>
         /// Starting Hosted Service
         /// </summary>

@@ -1,7 +1,10 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Args;
@@ -15,10 +18,15 @@ namespace TelegramBot.Service.Handlers
     {
         private readonly IParser _parser;
         private readonly IUserService _userService;
-        public MessageHandler(IParser parser, IUserService userService)
+        private IServiceScopeFactory _scopeFactory;
+        private readonly IArticleService _articleService;
+
+        public MessageHandler(IParser parser, IUserService userService, IArticleService articleService, IServiceScopeFactory scopeFactory)
         {
             _parser = parser;
             _userService = userService;
+            _articleService = articleService;
+            _scopeFactory = scopeFactory;
         }
 
         /// <summary>
@@ -31,7 +39,7 @@ namespace TelegramBot.Service.Handlers
         public async Task Handle(object sender, MessageEventArgs e, ITelegramBotClient _client)
         {
             if (e.Message is not { Type: Telegram.Bot.Types.Enums.MessageType.Text } || string.IsNullOrEmpty(e.Message.Text)) return;
-            
+
             try
             {
                 if (e.Message.Text.ToLower().Contains("/lastnews"))
@@ -133,8 +141,16 @@ namespace TelegramBot.Service.Handlers
 
             var temp = Task.Run(() =>
             {
-                 _userService.StartSubscribeAsync(user);
+                _userService.StartSubscribeAsync(user);
             }).ContinueWith(x => _client.SendTextMessageAsync(chatId, "Вы успешно подписались на рассылку!"));
+
+            var articles = await ReturnNewArticles();
+            foreach (var item in articles)
+            {
+                var linkButton = KeyboardGoOver("Перейти", (EncodeUrl(item.Href)));
+                await _client.SendPhotoAsync(chatId: chatId, photo: item.Image,
+                    caption: $"*{item.Title}*", parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown, replyMarkup: linkButton);
+            }
         }
 
         /// <summary>
@@ -195,6 +211,25 @@ namespace TelegramBot.Service.Handlers
                 .Select(m => Convert.ToInt32(m.Value))
                 .ToList();
             return (numbers[0], numbers[1]);
+        }
+
+        private Task GetNewArticles()
+        {
+            var timer = new Timer(async (o) => await ReturnNewArticles(), null, TimeSpan.Zero, TimeSpan.FromSeconds(49));
+            return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Find new articles and return them 
+        /// </summary>
+        /// <returns></returns>
+        private async Task<IEnumerable<NewsDTO>> ReturnNewArticles()
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var articlesRequest = await _parser.MakeRequestWithoutSaving();
+            var articlesFromDb = await _articleService.GetLasFiveNewsAsync();
+            return articlesRequest;
+            //return articlesFromDb is not null ? articlesFromDb.Except(articlesRequest) : articlesRequest;
         }
     }
 }

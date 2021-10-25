@@ -1,11 +1,11 @@
-﻿
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using TelegramBot.BLL.DTO;
 
 namespace TelegramBot.BLL.Interfaces
 {
     public interface IArticleService
     {
-        IEnumerable<NewsDTO> GetLasFiveNews();
+        Task<IEnumerable<NewsDTO>> GetLasFiveNewsAsync();
     }
 }

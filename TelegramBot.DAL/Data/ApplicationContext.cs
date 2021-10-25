@@ -10,14 +10,13 @@ namespace TelegramBot.DAL.Data
 
         public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options)
         {
-            //Database.EnsureDeleted();
             Database.EnsureCreated();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<News>().Property(tn => tn.Id).ValueGeneratedOnAdd();
-            
+
             modelBuilder.Entity<News>().Property(tn => tn.Title).IsRequired();
             modelBuilder.Entity<News>().Property(tn => tn.Href).IsRequired();
             modelBuilder.Entity<News>().Property(tn => tn.Image).IsRequired();

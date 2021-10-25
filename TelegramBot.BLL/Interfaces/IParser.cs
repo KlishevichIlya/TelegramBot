@@ -8,5 +8,6 @@ namespace TelegramBot.BLL.Interfaces
     public interface IParser
     {
         Task<IEnumerable<NewsDTO>> MakeHtmlRequest(int offset, int count);
+        Task<IEnumerable<NewsDTO>> MakeRequestWithoutSaving();
     }
 }

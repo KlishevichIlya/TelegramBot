@@ -20,6 +20,5 @@ namespace TelegramBot.DAL.UnitOfWork
         }
 
         public async Task<int> CompleteAsync() => await _context.SaveChangesAsync();
-
     }
 }

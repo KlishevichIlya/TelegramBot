@@ -25,8 +25,7 @@ namespace TelegramBot.Service
 
             services.AddDbContext<ApplicationContext>(options =>
                 options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection"),
-                    o => { o.CommandTimeout(100); }));
+                    Configuration.GetConnectionString("DefaultConnection")));
             BLLInjection.Injection(services);
             services.AddScoped<MessageHandler>();
         }

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using TelegramBot.BLL.DTO;
 using TelegramBot.BLL.Interfaces;
 using TelegramBot.DAL.Entities;
@@ -15,10 +16,11 @@ namespace TelegramBot.BLL.Services
             _db = db;
         }
 
-        public IEnumerable<NewsDTO> GetLasFiveNews()
+        public async Task<IEnumerable<NewsDTO>> GetLasFiveNewsAsync()
         {
-            var mapper = new MapperConfiguration(cfg => cfg.CreateMap<News, NewsDTO>()).CreateMapper();
-            return mapper.Map<IEnumerable<News>, IEnumerable<NewsDTO>>(_db.News.GetLastFiveNews());
+            var config = new MapperConfiguration(cfg => cfg.CreateMap<News, NewsDTO>());
+            var mapper = new Mapper(config);
+            return mapper.Map<IEnumerable<News>, IEnumerable<NewsDTO>>(await _db.News.GetLastFiveNewsAsync());
         }
     }
 }
