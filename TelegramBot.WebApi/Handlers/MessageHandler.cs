@@ -4,8 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
-using System.Threading;
+
 using System.Threading.Tasks;
+using System.Timers;
 using Telegram.Bot;
 using Telegram.Bot.Args;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -59,7 +60,7 @@ namespace TelegramBot.Service.Handlers
 
                 if (e.Message.Text.ToLower().Contains("/unsubscribe"))
                 {
-                    await OnStopSubscibeAsync(e.Message.From.Username, e.Message.From.Id);
+                    await OnStopSubscibeAsync(e.Message.From.Username, e.Message.From.Id, _client, e.Message.Chat.Id);
                 }
 
             }
@@ -139,10 +140,13 @@ namespace TelegramBot.Service.Handlers
                 UserName = userName
             };
 
-            var temp = Task.Run(() =>
-            {
-                _userService.StartSubscribeAsync(user);
-            }).ContinueWith(x => _client.SendTextMessageAsync(chatId, "Вы успешно подписались на рассылку!"));
+            //var temp = Task.Run(() =>
+            //{
+            //    _userService.StartSubscribeAsync(user);
+            //}).ContinueWith(x => _client.SendTextMessageAsync(chatId, "Вы успешно подписались на рассылку!"));
+
+            await _userService.StartSubscribeAsync(user);         
+            await _client.SendTextMessageAsync(chatId, "Вы успешно подписались на рассылку");
 
             var articles = await ReturnNewArticles();
             foreach (var item in articles)
@@ -159,7 +163,7 @@ namespace TelegramBot.Service.Handlers
         /// <param name="userName"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        private async Task OnStopSubscibeAsync(string userName, long userId)
+        private async Task OnStopSubscibeAsync(string userName, long userId, ITelegramBotClient _client, long chatId)
         {
             var user = new UserDTO()
             {
@@ -167,6 +171,7 @@ namespace TelegramBot.Service.Handlers
                 UserName = userName
             };
             await _userService.StopSubscribeAsync(user);
+            await _client.SendTextMessageAsync(chatId, "Вы успешно отписались от рассылки");
         }
 
         /// <summary>
@@ -213,10 +218,13 @@ namespace TelegramBot.Service.Handlers
             return (numbers[0], numbers[1]);
         }
 
-        private Task GetNewArticles()
+        private async Task<IEnumerable<NewsDTO>> GetNewArticles()
         {
-            var timer = new Timer(async (o) => await ReturnNewArticles(), null, TimeSpan.Zero, TimeSpan.FromSeconds(49));
-            return Task.CompletedTask;
+            var tn = new Timer();
+            tn.
+            return await ReturnNewArticles();
+            //var timer = new Timer(async (o) => await ReturnNewArticles(), null, TimeSpan.Zero, TimeSpan.FromSeconds(49));
+            //return Task.CompletedTask;
         }
 
         /// <summary>
