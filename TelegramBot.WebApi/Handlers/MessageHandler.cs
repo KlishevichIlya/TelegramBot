@@ -4,13 +4,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
-
+using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
 using Telegram.Bot;
 using Telegram.Bot.Args;
 using Telegram.Bot.Types.ReplyMarkups;
 using TelegramBot.BLL.DTO;
+using TelegramBot.BLL.Infrastructure;
 using TelegramBot.BLL.Interfaces;
 
 namespace TelegramBot.Service.Handlers
@@ -21,6 +21,8 @@ namespace TelegramBot.Service.Handlers
         private readonly IUserService _userService;
         private IServiceScopeFactory _scopeFactory;
         private readonly IArticleService _articleService;
+        private CancellationTokenSource _tokenSource;
+        private static Dictionary<long, CancellationTokenSource> dictionary = new();
 
         public MessageHandler(IParser parser, IUserService userService, IArticleService articleService, IServiceScopeFactory scopeFactory)
         {
@@ -139,22 +141,30 @@ namespace TelegramBot.Service.Handlers
                 UserId = userId.ToString(),
                 UserName = userName
             };
-
-            //var temp = Task.Run(() =>
-            //{
-            //    _userService.StartSubscribeAsync(user);
-            //}).ContinueWith(x => _client.SendTextMessageAsync(chatId, "Вы успешно подписались на рассылку!"));
-
-            await _userService.StartSubscribeAsync(user);         
-            await _client.SendTextMessageAsync(chatId, "Вы успешно подписались на рассылку");
-
-            var articles = await ReturnNewArticles();
-            foreach (var item in articles)
+            await _userService.StartSubscribeAsync(user);
+            await _client.SendTextMessageAsync(chatId, "You subscribed successfully ");
+            _tokenSource = new CancellationTokenSource();
+            dictionary.Add(userId, _tokenSource);
+            try
             {
-                var linkButton = KeyboardGoOver("Перейти", (EncodeUrl(item.Href)));
-                await _client.SendPhotoAsync(chatId: chatId, photo: item.Image,
-                    caption: $"*{item.Title}*", parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown, replyMarkup: linkButton);
+                await CheckTick(_client, chatId, dictionary, userId);
             }
+            catch (OperationCanceledException e)
+            {
+                await _client.SendTextMessageAsync(chatId, "You unsubscribed successfully");
+            }
+            //finally
+            //{
+            //    _tokenSource.Dispose();
+            //}
+
+            //var articles = await ReturnNewArticles();
+            //foreach (var item in articles)
+            //{
+            //    var linkButton = KeyboardGoOver("Перейти", (EncodeUrl(item.Href)));
+            //    await _client.SendPhotoAsync(chatId: chatId, photo: item.Image,
+            //        caption: $"*{item.Title}*", parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown, replyMarkup: linkButton);
+            //}
         }
 
         /// <summary>
@@ -171,7 +181,9 @@ namespace TelegramBot.Service.Handlers
                 UserName = userName
             };
             await _userService.StopSubscribeAsync(user);
-            await _client.SendTextMessageAsync(chatId, "Вы успешно отписались от рассылки");
+            var ts = dictionary[userId];
+            ts.Cancel();
+            ts.Dispose();
         }
 
         /// <summary>
@@ -217,27 +229,42 @@ namespace TelegramBot.Service.Handlers
                 .ToList();
             return (numbers[0], numbers[1]);
         }
-
-        private async Task<IEnumerable<NewsDTO>> GetNewArticles()
-        {
-            var tn = new Timer();
-            tn.
-            return await ReturnNewArticles();
-            //var timer = new Timer(async (o) => await ReturnNewArticles(), null, TimeSpan.Zero, TimeSpan.FromSeconds(49));
-            //return Task.CompletedTask;
-        }
-
+        
         /// <summary>
         /// Find new articles and return them 
         /// </summary>
         /// <returns></returns>
         private async Task<IEnumerable<NewsDTO>> ReturnNewArticles()
         {
-            using var scope = _scopeFactory.CreateScope();
             var articlesRequest = await _parser.MakeRequestWithoutSaving();
             var articlesFromDb = await _articleService.GetLasFiveNewsAsync();
-            return articlesRequest;
-            //return articlesFromDb is not null ? articlesFromDb.Except(articlesRequest) : articlesRequest;
+            return articlesFromDb.Count() != 0 ? articlesFromDb.Except(articlesRequest, new TitleComparer()) : articlesRequest;
+        }
+        
+        private Task CheckTick(ITelegramBotClient _client, long chatId, Dictionary<long, CancellationTokenSource> dictionary, long userId)
+        {
+            var ts = dictionary[userId];
+            return Task.Run(async () =>
+            {
+                ts.Token.ThrowIfCancellationRequested();
+               
+                while (true)
+                {
+                    var newArticles = await ReturnNewArticles();
+                    foreach (var article in newArticles)
+                    {
+                        var linkButton = KeyboardGoOver("Перейти", (EncodeUrl(article.Href)));
+                        await _client.SendPhotoAsync(chatId: chatId, photo: article.Image,
+                                caption: $"*{article.Title}*", parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown, replyMarkup: linkButton);
+                    }
+
+                    if (ts.Token.IsCancellationRequested)
+                    {
+                        ts.Token.ThrowIfCancellationRequested();
+                    }
+                    await Task.Delay(3000, ts.Token);
+                }
+            }, ts.Token);
         }
     }
 }

@@ -15,7 +15,7 @@ namespace TelegramBot.DAL.NewsRepository
         }
 
         public async Task<IEnumerable<News>> GetLastFiveNewsAsync() =>
-            await _context.News.OrderByDescending(x => x.Date).Take(5).ToListAsync();
+            await _context.News.OrderBy(x => x.Date).Take(5).ToListAsync();
 
     }
 }
