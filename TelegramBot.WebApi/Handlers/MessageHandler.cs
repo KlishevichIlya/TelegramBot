@@ -62,7 +62,7 @@ namespace TelegramBot.Service.Handlers
 
                 if (e.Message.Text.ToLower().Contains("/unsubscribe"))
                 {
-                    await OnStopSubscibeAsync(e.Message.From.Username, e.Message.From.Id, _client, e.Message.Chat.Id);
+                    await OnStopSubscribeAsync(e.Message.From.Username, e.Message.From.Id, _client, e.Message.Chat.Id);
                 }
 
             }
@@ -147,24 +147,12 @@ namespace TelegramBot.Service.Handlers
             dictionary.Add(userId, _tokenSource);
             try
             {
-                await CheckTick(_client, chatId, dictionary, userId);
+                await CheckWebSite(_client, chatId, dictionary, userId);
             }
             catch (OperationCanceledException e)
             {
                 await _client.SendTextMessageAsync(chatId, "You unsubscribed successfully");
             }
-            //finally
-            //{
-            //    _tokenSource.Dispose();
-            //}
-
-            //var articles = await ReturnNewArticles();
-            //foreach (var item in articles)
-            //{
-            //    var linkButton = KeyboardGoOver("Перейти", (EncodeUrl(item.Href)));
-            //    await _client.SendPhotoAsync(chatId: chatId, photo: item.Image,
-            //        caption: $"*{item.Title}*", parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown, replyMarkup: linkButton);
-            //}
         }
 
         /// <summary>
@@ -173,7 +161,7 @@ namespace TelegramBot.Service.Handlers
         /// <param name="userName"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        private async Task OnStopSubscibeAsync(string userName, long userId, ITelegramBotClient _client, long chatId)
+        private async Task OnStopSubscribeAsync(string userName, long userId, ITelegramBotClient _client, long chatId)
         {
             var user = new UserDTO()
             {
@@ -241,7 +229,15 @@ namespace TelegramBot.Service.Handlers
             return articlesFromDb.Count() != 0 ? articlesFromDb.Except(articlesRequest, new TitleComparer()) : articlesRequest;
         }
         
-        private Task CheckTick(ITelegramBotClient _client, long chatId, Dictionary<long, CancellationTokenSource> dictionary, long userId)
+        /// <summary>
+        /// Check website and 
+        /// </summary>
+        /// <param name="_client"></param>
+        /// <param name="chatId"></param>
+        /// <param name="dictionary"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        private Task CheckWebSite(ITelegramBotClient _client, long chatId, Dictionary<long, CancellationTokenSource> dictionary, long userId)
         {
             var ts = dictionary[userId];
             return Task.Run(async () =>
@@ -262,7 +258,7 @@ namespace TelegramBot.Service.Handlers
                     {
                         ts.Token.ThrowIfCancellationRequested();
                     }
-                    await Task.Delay(3000, ts.Token);
+                    await Task.Delay(TimeSpan.FromHours(10.0d), ts.Token);
                 }
             }, ts.Token);
         }

@@ -19,6 +19,6 @@ namespace TelegramBot.DAL.UnitOfWork
             News = new NewsRepository.NewsRepository(_context);
         }
 
-        public async Task<int> CompleteAsync() => await _context.SaveChangesAsync();
+        public async Task CompleteAsync() => await _context.SaveChangesAsync();
     }
 }

@@ -8,6 +8,6 @@ namespace TelegramBot.DAL.UnitOfWork
     {
         INewsRepository News { get; }
         IUserRepository Users { get; }
-        Task<int> CompleteAsync();
+        Task CompleteAsync();
     }
 }
