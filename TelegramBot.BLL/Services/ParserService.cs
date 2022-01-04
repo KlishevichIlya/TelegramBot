@@ -28,13 +28,15 @@ namespace TelegramBot.BLL.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<NewsDTO>> MakeHtmlRequest(int offset = 0, int count = 0)
+        public async IAsyncEnumerable<NewsDTO> MakeHtmlRequest(int offset = 0, int count = 0)
         {
             var page = CalculatePage(offset);
             var document = await GetDocument(page);
             var listOfArticles = new List<NewsDTO>();
 
-            foreach (var node in document.QuerySelectorAll("div.elem-66 div.news-item"))
+            var news = document.QuerySelectorAll("div.elem-66 div.news-item").ToList();
+            
+            foreach (var node in news.GetRange(offset % newsPerPage, count))
             {
                 var item = new NewsDTO
                 {
@@ -43,10 +45,11 @@ namespace TelegramBot.BLL.Services
                     Title = node.QuerySelector("div.item a.thumb img").GetAttribute("alt")
                 };
                 listOfArticles.Add(item);
+                yield return item;
             }
             await SaveArticlesAsync(listOfArticles);
 
-            return listOfArticles.GetRange(offset % newsPerPage, count);
+           // return listOfArticles.GetRange(offset % newsPerPage, count);
         }
 
         public async Task<IEnumerable<NewsDTO>> MakeRequestWithoutSaving()

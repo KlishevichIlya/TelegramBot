@@ -82,8 +82,8 @@ namespace TelegramBot.Service.Handlers
         /// <returns></returns>
         private async Task SendArticleAsync(long chatId, int offset, int count, ITelegramBotClient _client)
         {
-            var articles = await _parser.MakeHtmlRequest(offset, count);
-            foreach (var article in articles)
+            //var articles = await _parser.MakeHtmlRequest(offset, count);
+            await foreach (var article in _parser.MakeHtmlRequest(offset, count))
             {
                 var linkButton = KeyboardGoOver("Перейти", (EncodeUrl(article.Href)));
                 await _client.SendPhotoAsync(chatId: chatId, photo: article.Image,
