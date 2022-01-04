@@ -170,8 +170,8 @@ namespace TelegramBot.Service.Handlers
             };
             await _userService.StopSubscribeAsync(user);
             var ts = dictionary[userId];
-            ts.Cancel();
-            ts.Dispose();
+            ts.Cancel();            
+            //ts.Dispose();
         }
 
         /// <summary>
@@ -247,18 +247,18 @@ namespace TelegramBot.Service.Handlers
                 while (true)
                 {
                     var newArticles = await ReturnNewArticles();
+                    await _parser.SaveArticlesAsync(newArticles);
                     foreach (var article in newArticles)
                     {
                         var linkButton = KeyboardGoOver("Перейти", (EncodeUrl(article.Href)));
                         await _client.SendPhotoAsync(chatId: chatId, photo: article.Image,
                                 caption: $"*{article.Title}*", parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown, replyMarkup: linkButton);
-                    }
-
+                    }                    
                     if (ts.Token.IsCancellationRequested)
                     {
                         ts.Token.ThrowIfCancellationRequested();
                     }
-                    await Task.Delay(TimeSpan.FromHours(10.0d), ts.Token);
+                    await Task.Delay(TimeSpan.FromSeconds(20), ts.Token);
                 }
             }, ts.Token);
         }

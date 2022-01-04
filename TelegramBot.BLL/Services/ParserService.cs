@@ -44,7 +44,7 @@ namespace TelegramBot.BLL.Services
                 };
                 listOfArticles.Add(item);
             }
-            await SaveArticles(listOfArticles);
+            await SaveArticlesAsync(listOfArticles);
 
             return listOfArticles.GetRange(offset % newsPerPage, count);
         }
@@ -68,7 +68,7 @@ namespace TelegramBot.BLL.Services
             return listOfArticles.GetRange(0, 5);
         }
 
-        private async Task SaveArticles(IEnumerable<NewsDTO> articlesDTO)
+        public async Task SaveArticlesAsync(IEnumerable<NewsDTO> articlesDTO)
         {
             var articles = _mapper.Map<IEnumerable<NewsDTO>, IEnumerable<News>>(articlesDTO);
             var articlesFromDb = await _unitOfWork.News.GetAllAsync();

@@ -9,5 +9,6 @@ namespace TelegramBot.BLL.Interfaces
     {
         Task<IEnumerable<NewsDTO>> MakeHtmlRequest(int offset, int count);
         Task<IEnumerable<NewsDTO>> MakeRequestWithoutSaving();
+        Task SaveArticlesAsync(IEnumerable<NewsDTO> articlesDTO);
     }
 }
