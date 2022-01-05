@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System;
 using TelegramBot.BLL;
 using TelegramBot.DAL.Data;
 using TelegramBot.Service.Handlers;
@@ -25,7 +26,20 @@ namespace TelegramBot.Service
 
             services.AddDbContext<ApplicationContext>(options =>
                 options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection")));
+                    Configuration.GetConnectionString("TgBotProd")));
+            //if(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production")
+            //{
+            //    services.AddDbContext<ApplicationContext>(options =>
+            //        options.UseSqlServer(
+            //            Configuration.GetConnectionString("TgBotProd")));
+            //}
+            //else
+            //{
+            //    services.AddDbContext<ApplicationContext>(options =>
+            //        options.UseSqlServer(
+            //            Configuration.GetConnectionString("DefaultConnection")));
+            //}
+            //services.BuildServiceProvider().GetService<ApplicationContext>().Database.Migrate();
             BLLInjection.Injection(services);
             services.AddScoped<MessageHandler>();
         }

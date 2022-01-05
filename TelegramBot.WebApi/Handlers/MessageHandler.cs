@@ -151,7 +151,8 @@ namespace TelegramBot.Service.Handlers
             }
             catch (OperationCanceledException e)
             {
-                await _client.SendTextMessageAsync(chatId, "You unsubscribed successfully");
+                dictionary.Remove(userId);
+                await _client.SendTextMessageAsync(chatId, "You was unsubscribed successfully");
             }
         }
 
@@ -168,7 +169,7 @@ namespace TelegramBot.Service.Handlers
                 UserId = userId.ToString(),
                 UserName = userName
             };
-            await _userService.StopSubscribeAsync(user);
+            await _userService.StopSubscribeAsync(user);           
             var ts = dictionary[userId];
             ts.Cancel();            
             //ts.Dispose();
@@ -258,7 +259,7 @@ namespace TelegramBot.Service.Handlers
                     {
                         ts.Token.ThrowIfCancellationRequested();
                     }
-                    await Task.Delay(TimeSpan.FromSeconds(20), ts.Token);
+                    await Task.Delay(TimeSpan.FromHours(10), ts.Token);
                 }
             }, ts.Token);
         }
