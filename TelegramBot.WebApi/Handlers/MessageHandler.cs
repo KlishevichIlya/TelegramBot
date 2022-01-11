@@ -226,8 +226,8 @@ namespace TelegramBot.Service.Handlers
         private async Task<IEnumerable<NewsDTO>> ReturnNewArticles()
         {
             var articlesRequest = await _parser.MakeRequestWithoutSaving();
-            var articlesFromDb = await _articleService.GetLasFiveNewsAsync();
-            return articlesFromDb.Count() != 0 ? articlesFromDb.Except(articlesRequest, new TitleComparer()) : articlesRequest;
+            var articlesFromDb = await _articleService.GetLasFiveNewsAsync();            
+            return articlesFromDb.Count() != 0 ? articlesRequest.Except(articlesFromDb, new TitleComparer()) : articlesRequest;
         }
         
         /// <summary>
