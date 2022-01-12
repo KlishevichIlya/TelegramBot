@@ -11,7 +11,8 @@ namespace TelegramBot.BLL.Mapping
             CreateMap<NewsDTO, News>()
                 .ForMember(x => x.Id, f => f.MapFrom(f => f.Id))
                 .ForMember(x => x.Image, f => f.MapFrom(u => u.Image))
-                .ForMember(x => x.Title, f => f.MapFrom(u => u.Title));
+                .ForMember(x => x.Title, f => f.MapFrom(u => u.Title))
+                .ForMember(x => x.Date, f => f.MapFrom(u => u.DateOfCreating));
 
             CreateMap<UserDTO, User>()
                 //.ForMember(x => x.Id, f => f.MapFrom(u => u.Id))

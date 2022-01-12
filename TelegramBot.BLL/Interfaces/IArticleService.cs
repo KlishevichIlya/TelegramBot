@@ -4,7 +4,7 @@ using TelegramBot.BLL.DTO;
 
 namespace TelegramBot.BLL.Interfaces
 {
-    public interface IArticleService
+    public interface IArticleService 
     {
         Task<IEnumerable<NewsDTO>> GetLasFiveNewsAsync();
     }

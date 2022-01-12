@@ -1,7 +1,9 @@
 ﻿using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
 using AutoMapper;
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -42,8 +44,10 @@ namespace TelegramBot.BLL.Services
                 {
                     Href = "https://autorun.by/" + node.QuerySelector("div.item a.thumb").GetAttribute("href"),
                     Image = "https://autorun.by/" + node.QuerySelector("div.item a.thumb img").GetAttribute("src"),
-                    Title = node.QuerySelector("div.item a.thumb img").GetAttribute("alt")
-                };
+                    Title = node.QuerySelector("div.item a.thumb img").GetAttribute("alt"),
+                    DateOfCreating = DateTime.Parse(node.QuerySelector("div.item div.title ul li span").TextContent,
+                            new CultureInfo("ru-Ru"), DateTimeStyles.NoCurrentDateDefault)
+                };               
                 listOfArticles.Add(item);
                 yield return item;
             }
@@ -77,17 +81,13 @@ namespace TelegramBot.BLL.Services
             var articlesFromDb = await _unitOfWork.News.GetAllAsync();
 
             if (!articlesFromDb.Any())
-            {
-                foreach (var item in articles)
-                    item.Date = System.DateTime.Now;
+            {                
                 await _unitOfWork.News.AddRangeAsync(articles);
                 await _unitOfWork.CompleteAsync();
             }
             else
             {
-                var filteredArticles = articles.Where(a => !articlesFromDb.Any(db => a.Title == db.Title)).ToList();
-                foreach (var item in filteredArticles)
-                    item.Date = System.DateTime.Now;
+                var filteredArticles = articles.Where(a => !articlesFromDb.Any(db => a.Title == db.Title)).ToList();                
                 await _unitOfWork.News.AddRangeAsync(filteredArticles);
                 await _unitOfWork.CompleteAsync();
             }
