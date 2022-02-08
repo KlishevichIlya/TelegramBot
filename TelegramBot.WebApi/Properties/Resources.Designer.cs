@@ -61,7 +61,7 @@ namespace TelegramBot.Service.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Production.
+        ///   Looks up a localized string similar to Development.
         /// </summary>
         internal static string ASPNETCORE_ENVIRONMENT {
             get {

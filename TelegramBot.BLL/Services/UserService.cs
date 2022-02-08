@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using TelegramBot.BLL.DTO;
 using TelegramBot.BLL.Interfaces;
@@ -15,6 +16,11 @@ namespace TelegramBot.BLL.Services
         public UserService(IUnitOfWork db)
         {
             _db = db;
+        }
+
+        public async Task<IEnumerable<User>> GetAllUsers()
+        {
+           return await _db.Users.GetAllAsync();
         }
 
         public async Task StartSubscribeAsync(UserDTO userDTO)

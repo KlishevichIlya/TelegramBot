@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System;
+using Microsoft.OpenApi.Models;
 using TelegramBot.BLL;
 using TelegramBot.DAL.Data;
 using TelegramBot.Service.Handlers;
@@ -23,10 +23,14 @@ namespace TelegramBot.Service
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebApiTest", Version = "v1" });
+            });
+            services.AddCors();
             services.AddDbContext<ApplicationContext>(options =>
                 options.UseSqlServer(
-                    Configuration.GetConnectionString("TgBotProd")));
+                    Configuration.GetConnectionString("DefaultConnection")));
             //if(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production")
             //{
             //    services.AddDbContext<ApplicationContext>(options =>
@@ -49,7 +53,15 @@ namespace TelegramBot.Service
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseSwagger();
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "WebApiTest v1"));
             }
+            app.UseCors(opt => opt
+                .WithOrigins(new[] { "http://localhost:3000" })
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials()
+                );
 
             app.UseHttpsRedirection();
 
