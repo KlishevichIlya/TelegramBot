@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using System.Collections.Generic;
 using TelegramBot.BLL;
 using TelegramBot.DAL.Data;
 using TelegramBot.Service.Handlers;
@@ -55,7 +56,14 @@ namespace TelegramBot.Service
                 app.UseDeveloperExceptionPage();
             }
             app.UseSwagger();
-            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "WebApiTest v1"));
+            //app.UseSwagger(c =>
+            //{
+            //    c.PreSerializeFilters.Add((swagger, httpReq) =>
+            //    {
+            //        swagger.Servers = new List<OpenApiServer> { new OpenApiServer { Url = $"{httpReq.Scheme}://{httpReq.Host.Value}/{httpReq.Headers["X-Forwarded-Prefix"]}" } };
+            //    });
+            //});
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("v1/swagger.json", "WebApiTest v1"));
            
             //app.UseCors(opt => opt
             //    .WithOrigins(new[] { "http://localhost:3000" })
