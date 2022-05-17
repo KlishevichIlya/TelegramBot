@@ -45,15 +45,12 @@ namespace TelegramBot.BLL.Services
                     Href = "https://autorun.by/" + node.QuerySelector("div.item a.thumb").GetAttribute("href"),
                     Image = "https://autorun.by/" + node.QuerySelector("div.item a.thumb img").GetAttribute("src"),
                     Title = node.QuerySelector("div.item a.thumb img").GetAttribute("alt"),
-                    DateOfCreating = DateTime.Parse(node.QuerySelector("div.item div.title ul li span").TextContent,
-                            new CultureInfo("ru-Ru"), DateTimeStyles.NoCurrentDateDefault)
+                    DateOfCreating = ParseDate(node.QuerySelector("div.item div.title ul li span").TextContent)
                 };               
                 listOfArticles.Add(item);
                 yield return item;
             }
             await SaveArticlesAsync(listOfArticles);
-
-           // return listOfArticles.GetRange(offset % newsPerPage, count);
         }
 
         public async Task<IEnumerable<NewsDTO>> MakeRequestWithoutSaving()
@@ -107,6 +104,18 @@ namespace TelegramBot.BLL.Services
             var parser = new HtmlParser();
             return await parser.ParseDocumentAsync(source);
 
+        }
+
+        private DateTime ParseDate(string textContent)
+        {
+            try
+            {
+              return DateTime.Parse(textContent, new CultureInfo("ru-Ru"), DateTimeStyles.NoCurrentDateDefault);
+            }
+            catch(Exception ex)
+            {
+                return DateTime.Now;
+            }
         }
     }
 }

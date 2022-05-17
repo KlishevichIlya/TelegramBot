@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
 using System.Threading.Tasks;
+using TelegramBot.BLL.DTO;
 using TelegramBot.BLL.Interfaces;
 
 namespace TelegramBot.Service.Controllers
 {
     [ApiController]
-    [Route("api/user")]
+    [Route("api/users")]
     public class UserController : Controller
     {
         private readonly IUserService _userService;
@@ -22,5 +22,14 @@ namespace TelegramBot.Service.Controllers
             var customers = await _userService.GetAllUsers();
             return Ok(customers);
         }
+
+
+        [HttpPatch]
+        public async Task<IActionResult> UpdateCustromer(UserDTO newUser)
+        {
+            var response = await _userService.UpdateUserAsync(newUser);
+            return Ok(response);
+        }
+
     }
 }

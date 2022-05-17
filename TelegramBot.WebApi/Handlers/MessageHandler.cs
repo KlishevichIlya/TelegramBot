@@ -139,7 +139,9 @@ namespace TelegramBot.Service.Handlers
             var user = new UserDTO
             {
                 UserId = userId.ToString(),
-                UserName = userName
+                UserName = userName,
+                DateOfStartSubscription =  DateTime.Now,
+                isUnsubscribe = false,
             };
             await _userService.StartSubscribeAsync(user);
             await _client.SendTextMessageAsync(chatId, "You subscribed successfully ");

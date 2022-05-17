@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using TelegramBot.BLL.DTO;
-using TelegramBot.DAL.Entities;
 
 namespace TelegramBot.BLL.Interfaces
 {
@@ -9,6 +8,8 @@ namespace TelegramBot.BLL.Interfaces
     {
         Task StartSubscribeAsync(UserDTO userDTO);
         Task StopSubscribeAsync(UserDTO userDTO);
-        Task<IEnumerable<User>> GetAllUsers();
+        Task<IEnumerable<UserDTO>> GetAllUsers();
+         
+        Task<IEnumerable<UserDTO>> UpdateUserAsync(UserDTO updatedUser);
     }
 }

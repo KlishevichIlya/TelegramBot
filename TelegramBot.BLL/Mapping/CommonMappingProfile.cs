@@ -15,9 +15,12 @@ namespace TelegramBot.BLL.Mapping
                 .ForMember(x => x.Date, f => f.MapFrom(u => u.DateOfCreating));
 
             CreateMap<UserDTO, User>()
-                //.ForMember(x => x.Id, f => f.MapFrom(u => u.Id))
                 .ForMember(x => x.UserId, f => f.MapFrom(u => u.UserId))
-                .ForMember(x => x.UserName, f => f.MapFrom(u => u.UserName));
+                .ForMember(x => x.UserName, f => f.MapFrom(u => u.UserName))
+                .ForMember(x => x.DateOfStartSubscription, f => f.MapFrom(u => u.DateOfStartSubscription))
+                .ForMember(x => x.isUnsubscribe, f => f.MapFrom(u => u.isUnsubscribe))
+                .ReverseMap();
+                      
         }
     }
 }

@@ -64,13 +64,13 @@ namespace TelegramBot.Service
             //    });
             //});
             app.UseSwaggerUI(c => c.SwaggerEndpoint("v1/swagger.json", "WebApiTest v1"));
-           
-            //app.UseCors(opt => opt
-            //    .WithOrigins(new[] { "http://localhost:3000" })
-            //    .AllowAnyHeader()
-            //    .AllowAnyMethod()
-            //    .AllowCredentials()
-            //    );
+
+            app.UseCors(opt => opt
+                .WithOrigins(new[] { "http://localhost:4200" })
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials()
+                );
 
             app.UseHttpsRedirection();
 
