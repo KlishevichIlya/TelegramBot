@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using TelegramBot.DAL.EditorRepository;
 using TelegramBot.DAL.NewsRepository;
 using TelegramBot.DAL.UserRepository;
 
@@ -8,6 +9,7 @@ namespace TelegramBot.DAL.UnitOfWork
     {
         INewsRepository News { get; }
         IUserRepository Users { get; }
+        IEditorRepository Editors { get; }
         Task CompleteAsync();
     }
 }

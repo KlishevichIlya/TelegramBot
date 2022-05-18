@@ -7,7 +7,7 @@ namespace TelegramBot.DAL
     {
         public static void Injection(IServiceCollection services)
         {
-            services.AddScoped<IUnitOfWork, UnitOfWork.UnitOfWork>();
+            services.AddTransient<IUnitOfWork, UnitOfWork.UnitOfWork>();
         }
     }
 }

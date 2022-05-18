@@ -7,10 +7,10 @@ namespace TelegramBot.DAL.Data
     {
         public DbSet<News> News { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<Editor> Editors { get; set; }
 
         public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options)
-        {
-            Database.EnsureCreated();
+        {            
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -25,6 +25,10 @@ namespace TelegramBot.DAL.Data
             modelBuilder.Entity<User>().Property(tn => tn.UserId).IsRequired();
             modelBuilder.Entity<User>().Property(tn => tn.UserName).IsRequired();
             modelBuilder.Entity<User>().Property(tn => tn.DateOfStartSubscription).IsRequired();
+
+            modelBuilder.Entity<Editor>().Property(p => p.Email).IsRequired();
+            modelBuilder.Entity<Editor>().Property(p => p.Password).IsRequired();
+            modelBuilder.Entity<Editor>().Property(p => p.isAdminRule).IsRequired();
             base.OnModelCreating(modelBuilder);
         }
     }

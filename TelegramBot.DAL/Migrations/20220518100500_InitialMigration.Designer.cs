@@ -10,8 +10,8 @@ using TelegramBot.DAL.Data;
 namespace TelegramBot.DAL.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20211014143831_DeletedIdFromUser")]
-    partial class DeletedIdFromUser
+    [Migration("20220518100500_InitialMigration")]
+    partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -20,6 +20,29 @@ namespace TelegramBot.DAL.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("ProductVersion", "5.0.10")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+            modelBuilder.Entity("TelegramBot.DAL.Entities.Editor", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("isAdminRule")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Editors");
+                });
 
             modelBuilder.Entity("TelegramBot.DAL.Entities.News", b =>
                 {
@@ -59,6 +82,9 @@ namespace TelegramBot.DAL.Migrations
                     b.Property<string>("UserName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("isUnsubscribe")
+                        .HasColumnType("bit");
 
                     b.HasKey("UserId");
 
