@@ -19,12 +19,7 @@ namespace TelegramBot.BLL.Mapping
                 .ForMember(x => x.UserName, f => f.MapFrom(u => u.UserName))
                 .ForMember(x => x.DateOfStartSubscription, f => f.MapFrom(u => u.DateOfStartSubscription))
                 .ForMember(x => x.isUnsubscribe, f => f.MapFrom(u => u.isUnsubscribe))
-                .ReverseMap();
-            CreateMap<EditorDTO, Editor>()
-                .ForMember(e => e.Email, f => f.MapFrom(e => e.Email))
-                .ForMember(e => e.Password, f => f.MapFrom(e => e.Password))
-                .ForMember(e => e.isAdminRule, f => f.MapFrom(e => e.isAdminRule))
-                .ReverseMap();
+                .ReverseMap();            
         }
     }
 }

@@ -14,7 +14,7 @@ namespace TelegramBot.BLL
             services.AddScoped<IParser, ParserService>();
             services.AddScoped<IArticleService, ArticleService>();
             services.AddTransient<IUserService, UserService>();
-            services.AddScoped<IEditorService, EditorService>();
+            services.AddTransient<IWebUserService, WebUserService>();
             services.AddAutoMapper(typeof(CommonMappingProfile));
         }
     }

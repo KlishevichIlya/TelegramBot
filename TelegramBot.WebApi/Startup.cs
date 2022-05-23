@@ -1,11 +1,14 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Collections.Generic;
+using System;
+using System.Text;
 using TelegramBot.BLL;
 using TelegramBot.DAL.Data;
 using TelegramBot.Service.Handlers;
@@ -23,6 +26,30 @@ namespace TelegramBot.Service
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddAuthentication(opt =>
+            {
+                opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                opt.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+                .AddJwtBearer(opt =>
+                {
+                    var key = Encoding.UTF8.GetBytes(Configuration["JWT:Key"]);
+                    opt.SaveToken = true;
+                    opt.RequireHttpsMetadata = false;
+                    opt.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ClockSkew = TimeSpan.Zero,
+                        ValidAudience = Configuration["JWT:ValidAudience"],
+                        ValidIssuer = Configuration["JWT:ValidIssuer"],
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JWT:Secret"]))
+                    };
+                });
+            //services.AddSingleton<IJWTManagerRepository, JWTManager>
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
@@ -32,19 +59,6 @@ namespace TelegramBot.Service
             services.AddDbContext<ApplicationContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
-            //if(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production")
-            //{
-            //    services.AddDbContext<ApplicationContext>(options =>
-            //        options.UseSqlServer(
-            //            Configuration.GetConnectionString("TgBotProd")));
-            //}
-            //else
-            //{
-            //    services.AddDbContext<ApplicationContext>(options =>
-            //        options.UseSqlServer(
-            //            Configuration.GetConnectionString("DefaultConnection")));
-            //}
-            //services.BuildServiceProvider().GetService<ApplicationContext>().Database.Migrate();
             BLLInjection.Injection(services);
             services.AddScoped<MessageHandler>();
         }
@@ -55,14 +69,8 @@ namespace TelegramBot.Service
             {
                 app.UseDeveloperExceptionPage();
             }
+           
             app.UseSwagger();
-            //app.UseSwagger(c =>
-            //{
-            //    c.PreSerializeFilters.Add((swagger, httpReq) =>
-            //    {
-            //        swagger.Servers = new List<OpenApiServer> { new OpenApiServer { Url = $"{httpReq.Scheme}://{httpReq.Host.Value}/{httpReq.Headers["X-Forwarded-Prefix"]}" } };
-            //    });
-            //});
             app.UseSwaggerUI(c => c.SwaggerEndpoint("v1/swagger.json", "WebApiTest v1"));
 
             app.UseCors(opt => opt
@@ -75,8 +83,9 @@ namespace TelegramBot.Service
             app.UseHttpsRedirection();
 
             app.UseRouting();
-
+            app.UseAuthentication();
             app.UseAuthorization();
+            // app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {

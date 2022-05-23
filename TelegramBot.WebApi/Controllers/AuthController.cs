@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using ServiceResult;
+using ServiceResult.ApiExtensions;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using TelegramBot.BLL.DTO;
 using TelegramBot.BLL.Interfaces;
@@ -11,30 +12,18 @@ namespace TelegramBot.Service.Controllers
     [Route("api/auth")]
     public class AuthController : Controller
     {
-        private readonly IEditorService _repo;
-        public AuthController(IEditorService repo)
+        private readonly IWebUserService _webService;
+        public AuthController(IWebUserService webService)
         {
-            _repo = repo;
+            _webService = webService;
         }
 
 
-        [HttpPost("signup")]
-        public async Task<IActionResult> SignUpEditor(EditorDTO editor)
+        [HttpPost("signin")]
+        public async Task<IActionResult> SignIn([FromBody] LoginModel user)
         {
-            IEnumerable<EditorDTO> actualEditors;
-            try
-            {
-                actualEditors = await _repo.SignUpAsync(editor);
-            }
-            catch(ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            return Ok(actualEditors);
+            var result = await _webService.Login(user);
+            return this.FromResult(result);
         }  
     }
 }

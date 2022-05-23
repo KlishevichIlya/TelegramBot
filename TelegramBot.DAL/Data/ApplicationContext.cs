@@ -1,16 +1,17 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using TelegramBot.DAL.Entities;
 
 namespace TelegramBot.DAL.Data
 {
-    public class ApplicationContext : DbContext
+    public class ApplicationContext : IdentityDbContext<WebUser>
     {
         public DbSet<News> News { get; set; }
         public DbSet<User> Users { get; set; }
-        public DbSet<Editor> Editors { get; set; }
+        public DbSet<WebUser> WebUsers { get; set; }
 
         public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options)
-        {            
+        {
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -26,9 +27,8 @@ namespace TelegramBot.DAL.Data
             modelBuilder.Entity<User>().Property(tn => tn.UserName).IsRequired();
             modelBuilder.Entity<User>().Property(tn => tn.DateOfStartSubscription).IsRequired();
 
-            modelBuilder.Entity<Editor>().Property(p => p.Email).IsRequired();
-            modelBuilder.Entity<Editor>().Property(p => p.Password).IsRequired();
-            modelBuilder.Entity<Editor>().Property(p => p.isAdminRule).IsRequired();
+            modelBuilder.Entity<WebUser>().Property(p => p.Id).ValueGeneratedOnAdd();
+            
             base.OnModelCreating(modelBuilder);
         }
     }
