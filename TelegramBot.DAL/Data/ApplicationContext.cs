@@ -4,7 +4,7 @@ using TelegramBot.DAL.Entities;
 
 namespace TelegramBot.DAL.Data
 {
-    public class ApplicationContext : IdentityDbContext<WebUser>
+    public class ApplicationContext : DbContext
     {
         public DbSet<News> News { get; set; }
         public DbSet<User> Users { get; set; }

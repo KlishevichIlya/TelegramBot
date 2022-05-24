@@ -48,8 +48,7 @@ namespace TelegramBot.Service
                         ValidIssuer = Configuration["JWT:ValidIssuer"],
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JWT:Secret"]))
                     };
-                });
-            //services.AddSingleton<IJWTManagerRepository, JWTManager>
+                });            
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
@@ -58,7 +57,9 @@ namespace TelegramBot.Service
             services.AddCors();
             services.AddDbContext<ApplicationContext>(options =>
                 options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection")));
+                    //Configuration.GetConnectionString("DefaultConnection")
+                    Configuration.GetConnectionString("LaptopConnection")
+                    ));
             BLLInjection.Injection(services);
             services.AddScoped<MessageHandler>();
         }

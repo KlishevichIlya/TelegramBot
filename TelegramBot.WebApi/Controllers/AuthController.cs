@@ -18,12 +18,16 @@ namespace TelegramBot.Service.Controllers
             _webService = webService;
         }
 
+        [HttpPost("signup")]
+        public async Task<IActionResult> SignUp([FromBody] RegisterModel registerModel)
+        {
+            return Ok();
+        }
 
         [HttpPost("signin")]
-        public async Task<IActionResult> SignIn([FromBody] LoginModel user)
+        public async Task<IActionResult> SignIn([FromBody] LoginModel loginModel)
         {
-            var result = await _webService.Login(user);
-            return this.FromResult(result);
+            return Ok();
         }  
     }
 }

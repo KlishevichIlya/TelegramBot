@@ -10,10 +10,7 @@ namespace TelegramBot.DAL
     {
         public static void Injection(IServiceCollection services)
         {
-            services.AddTransient<IUnitOfWork, UnitOfWork.UnitOfWork>();
-            services.AddIdentity<WebUser, IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationContext>()
-                .AddDefaultTokenProviders();
+            services.AddTransient<IUnitOfWork, UnitOfWork.UnitOfWork>();           
         }
     }
 }

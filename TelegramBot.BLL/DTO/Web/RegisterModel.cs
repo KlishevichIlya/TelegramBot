@@ -13,5 +13,7 @@ namespace TelegramBot.BLL.DTO
 
         [Required(ErrorMessage = "Password is required")]
         public string Password { get; set; }
+
+        public bool IsAdmin { get; set; }
     }
 }
