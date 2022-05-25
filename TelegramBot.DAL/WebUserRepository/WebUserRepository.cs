@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -14,9 +15,14 @@ namespace TelegramBot.DAL.WebUserRepository
         {
         }
 
+        public async Task<WebUser> FIrstOrDefaultAsync(Expression<Func<WebUser, bool>> expression)
+        {
+            return await _context.WebUsers.Where(expression).FirstOrDefaultAsync();
+        }
+
         public async Task<WebUser> SingleOrDefaultAsync(Expression<Func<WebUser, bool>> expression)
         {
-            await _context.WebUsers.Where(expression)
+            return await _context.WebUsers.Where(expression).SingleOrDefaultAsync();
         }
     }
 }

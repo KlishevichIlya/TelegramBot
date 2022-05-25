@@ -33,8 +33,7 @@ namespace TelegramBot.Service
                 opt.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
             })
                 .AddJwtBearer(opt =>
-                {
-                    var key = Encoding.UTF8.GetBytes(Configuration["JWT:Key"]);
+                {                   
                     opt.SaveToken = true;
                     opt.RequireHttpsMetadata = false;
                     opt.TokenValidationParameters = new TokenValidationParameters
@@ -43,7 +42,6 @@ namespace TelegramBot.Service
                         ValidateAudience = true,
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
-                        ClockSkew = TimeSpan.Zero,
                         ValidAudience = Configuration["JWT:ValidAudience"],
                         ValidIssuer = Configuration["JWT:ValidIssuer"],
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JWT:Secret"]))
@@ -57,8 +55,8 @@ namespace TelegramBot.Service
             services.AddCors();
             services.AddDbContext<ApplicationContext>(options =>
                 options.UseSqlServer(
-                    //Configuration.GetConnectionString("DefaultConnection")
-                    Configuration.GetConnectionString("LaptopConnection")
+                    Configuration.GetConnectionString("DefaultConnection")
+                    //Configuration.GetConnectionString("LaptopConnection")
                     ));
             BLLInjection.Injection(services);
             services.AddScoped<MessageHandler>();

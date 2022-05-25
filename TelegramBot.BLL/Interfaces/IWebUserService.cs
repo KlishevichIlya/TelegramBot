@@ -7,7 +7,8 @@ namespace TelegramBot.BLL.Interfaces
 {
     public interface IWebUserService
     {
-        Task Login(LoginModel user);
-        Task Register(RegisterModel model);
+        Task<Result<Response>> LoginAsync(LoginModel user);
+        Task<Result<Response>> RegisterAsync(RegisterModel model);
+        Task<Result<Response>> RefreshAsync(string refreshToken);
     }
 }
