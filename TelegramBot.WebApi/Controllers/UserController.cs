@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using TelegramBot.BLL.DTO;
 using TelegramBot.BLL.Interfaces;
 
 namespace TelegramBot.Service.Controllers
 {
+    
     [ApiController]
     [Route("api/users")]
     public class UserController : Controller
@@ -15,7 +17,7 @@ namespace TelegramBot.Service.Controllers
             _userService = userService;
         }
 
-
+        [Authorize]
         [HttpGet("")]
         public async Task<IActionResult> GetAllCustomers()
         {

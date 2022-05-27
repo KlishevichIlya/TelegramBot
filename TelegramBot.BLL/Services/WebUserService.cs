@@ -37,14 +37,15 @@ namespace TelegramBot.BLL.Services
                     return new InvalidResult<Response>($"Wrong password!");
                 var token = GenerateToken(user);
                 var refreshToken = GenerateRefreshToken();
+                _ = double.TryParse(_configuration["JWT:TokenValidInMinutes"], out double expiresMinutes);
                 _ = double.TryParse(_configuration["JWT:RefreshokenValidityInDays"], out double expiresDays);
-                user.ExpirationDate =DateTime.Now.AddDays(expiresDays);
+                user.ExpirationDate = DateTime.Now.AddDays(expiresDays);
                 user.RefreshToken = refreshToken;
                 await _context.CompleteAsync();
                 return new SuccessResult<Response>(new Response()
                 {
                     Email = user.Email,
-                    Expiration = user.ExpirationDate,
+                    Expiration = DateTime.Now.AddMinutes(expiresMinutes),
                     RefreshToken = user.RefreshToken,
                     Token = token,
                     UserName = user.UserName,
@@ -75,6 +76,7 @@ namespace TelegramBot.BLL.Services
                 var token = GenerateToken(newUser);
                 var refreshToken = GenerateRefreshToken();
                 newUser.RefreshToken = refreshToken;                
+                _ = double.TryParse(_configuration["JWT:TokenValidInMinutes"], out double expiresMinutes);
                 _ = double.TryParse(_configuration["JWT:RefreshokenValidityInDays"], out double expiresDays);
                 newUser.ExpirationDate = DateTime.Now.AddDays(expiresDays);
                 await _context.WebUsers.AddAsync(newUser);
@@ -82,7 +84,7 @@ namespace TelegramBot.BLL.Services
                 return new SuccessResult<Response>(new Response()
                 {
                     Email = newUser.Email,
-                    Expiration = newUser.ExpirationDate,
+                    Expiration = DateTime.Now.AddMinutes(expiresMinutes),
                     RefreshToken = newUser.RefreshToken,
                     Token = token,
                     UserName = newUser.UserName,
@@ -106,6 +108,7 @@ namespace TelegramBot.BLL.Services
             var newToken = GenerateToken(user);
             var newRefreshToken = GenerateRefreshToken();
             user.RefreshToken = newRefreshToken;
+            _ = double.TryParse(_configuration["JWT:TokenValidInMinutes"], out double expiresMinutes);
             _ = double.TryParse(_configuration["JWT:RefreshokenValidityInDays"], out double expiresDays);
             user.ExpirationDate = DateTime.Now.AddDays(expiresDays);
             await _context.CompleteAsync();
@@ -113,7 +116,7 @@ namespace TelegramBot.BLL.Services
             return new SuccessResult<Response>(new Response()
             {
                 Email = user.Email,
-                Expiration = user.ExpirationDate,
+                Expiration = DateTime.Now.AddMinutes(expiresMinutes),
                 RefreshToken = user.RefreshToken,
                 Token = newToken,
                 UserName = user.UserName,
