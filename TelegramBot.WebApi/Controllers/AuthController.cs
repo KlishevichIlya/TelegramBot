@@ -30,7 +30,7 @@ namespace TelegramBot.Service.Controllers
         public async Task<IActionResult> SignIn([FromBody] LoginModel loginModel)
         {
             var result = await _webService.LoginAsync(loginModel);
-            if(result.Errors == null)
+            if(result.Errors.Count == 0)
                 SetRefreshTokenInCookie(result.Data);
             return this.FromResult(result);
         }  
