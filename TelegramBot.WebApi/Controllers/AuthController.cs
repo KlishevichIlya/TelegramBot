@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using ServiceResult.ApiExtensions;
+using System;
 using System.Threading.Tasks;
 using TelegramBot.BLL.DTO;
 using TelegramBot.BLL.DTO.Web;
@@ -13,9 +15,11 @@ namespace TelegramBot.Service.Controllers
     public class AuthController : Controller
     {
         private readonly IWebUserService _webService;
-        public AuthController(IWebUserService webService)
+        private readonly IConfiguration _configuration;
+        public AuthController(IWebUserService webService, IConfiguration configuration)
         {
             _webService = webService;
+            _configuration = configuration;
         }
 
         [HttpPost("signup")]
@@ -46,10 +50,12 @@ namespace TelegramBot.Service.Controllers
 
         private void SetRefreshTokenInCookie(Response response)
         {
+            _ = double.TryParse(_configuration["JWT:RefreshokenValidityInDays"], out double expiresDays);
+            var expiresDate = DateTime.Now.AddDays(expiresDays);
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Expires = response.Expiration
+                Expires = new DateTimeOffset(expiresDate),
             };
             Response.Cookies.Append("refreshToken", response.RefreshToken, cookieOptions);
         }
